@@ -4,16 +4,8 @@ from six import StringIO
 from gym import utils
 from gym.envs.toy_text import discrete
 import numpy as np
-#MAP = [
-#    "+---------+",
-#    "|R: | : :G|",
-#    "| : | : : |",
-#    "| : : : : |",
-#    "| | : | : |",
-#    "|Y| : |B: |",
-#    "+---------+",
-#]
-# Скорее не нужна
+import matlab.engine
+
 class MirrorENV(discrete.DiscreteEnv):
     """
     Description:
@@ -73,7 +65,7 @@ class MirrorENV(discrete.DiscreteEnv):
     - 45: os1(z1-a)vera1(v1-a)
     
     Rewards: 
-    Reward of -1 for each possible action and an additional reward for completed system.
+    Reward of -1 for each possible action and an additional reward for completed system +100.
     Reward of -10 for each unnecessary action.
     
     State space is represented by:
@@ -82,63 +74,209 @@ class MirrorENV(discrete.DiscreteEnv):
     """
     metadata = {'render.modes': ['human', 'ansi']}
     
-    def __init__(self):
-        self.desc = np.asarray(MAP, dtype='c')
-
-        self.locs = locs = [(0,0), (0,4), (4,0), (4,3)]
-
-        num_states = 500
-        num_rows = 5
-        num_columns = 5
-        max_row = num_rows - 1
-        max_col = num_columns - 1
-        initial_state_distrib = np.zeros(num_states)
-        num_actions = 6
+   def __init__(self):
+        
+        eng = matlab.engine.start_matlab()             #для работы со средой MATLAB
+        
+        coef_hands = coef_hands.mat                    #импортировать таблицу значений из MATLAB в качестве массива
+        num_states = 500                               #посчитать количество возможных состояний системы с учетом размеров матрицы и размеров изображения
+        initial_state_distrib = np.zeros(num_states)   #не понятно, надо ли оно
+        num_actions = 45                               #количество всех возможных действий 
+        state = eng.Obrabotka()                        #состояние задается 14 полиномами Цернике
         P = {state: {action: []
                      for action in range(num_actions)} for state in range(num_states)}
-        for row in range(num_rows):
-            for col in range(num_columns):
-                for pass_idx in range(len(locs) + 1):  # +1 for being inside taxi
-                    for dest_idx in range(len(locs)):
-                        state = self.encode(row, col, pass_idx, dest_idx)
-                        if pass_idx < 4 and pass_idx != dest_idx:
-                            initial_state_distrib[state] += 1
-                        for action in range(num_actions):
-                            # defaults
-                            new_row, new_col, new_pass_idx = row, col, pass_idx
-                            reward = -1 # default reward when there is no pickup/dropoff
-                            done = False
-                            taxi_loc = (row, col)
-
-                            if action == 0:
-                                new_row = min(row + 1, max_row)
-                            elif action == 1:
-                                new_row = max(row - 1, 0)
-                            if action == 2 and self.desc[1 + row, 2 * col + 2] == b":":
-                                new_col = min(col + 1, max_col)
-                            elif action == 3 and self.desc[1 + row, 2 * col] == b":":
-                                new_col = max(col - 1, 0)
-                            elif action == 4:  # pickup
-                                if (pass_idx < 4 and taxi_loc == locs[pass_idx]):
-                                    new_pass_idx = 4
-                                else: # passenger not at location
-                                    reward = -10
-                            elif action == 5:  # dropoff
-                                if (taxi_loc == locs[dest_idx]) and pass_idx == 4:
-                                    new_pass_idx = dest_idx
-                                    done = True
-                                    reward = 20
-                                elif (taxi_loc in locs) and pass_idx == 4:
-                                    new_pass_idx = locs.index(taxi_loc)
-                                else: # dropoff at wrong location
-                                    reward = -10
-                            new_state = self.encode(
-                                new_row, new_col, new_pass_idx, dest_idx)
-                            P[state][action].append(
-                                (1.0, new_state, reward, done))
+        for action in range(num_actions):
+            state
+            reward = -1                                #награда по умолчанию, когда не совершено ни одно действие
+            done = False
+                       
+            #возможные действия, награда = -1
+            if action == 0:
+                eng.sdg1(sg1+a)
+                reward = -1
+            if action == 1:
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 2:
+                eng.os1(z1+a)
+                reward = -1
+            if action == 3:
+                eng.gora1(g1+a)
+                reward = -1
+            if action == 4:
+                eng.vera1(v1+a)
+                reward = -1
+            if action == 5:
+                eng.sdg1(sg1-a)
+                reward = -1
+            if action == 6:
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 7:
+                eng.os1(z1-a)
+                reward = -1
+            if action == 8:
+                eng.gora1(g1-a)
+                reward = -1
+            if action == 9:
+                eng.vera1(v1-a)
+                reward = -1
+            if action == 10:
+                eng.gora1(g1+a)
+                eng.sdg1(sg1+a)
+                reward = -1
+            if action == 11:
+                eng.vera1(v1+a)
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 12:
+                eng.os1(z1+a)
+                eng.sdg1(sg1+a)
+                reward = -1
+            if action == 13:
+                eng.os1(z1+a)
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 14:
+                eng.gora1(g1+a)
+                eng.sdg1(sg1-a)
+                reward = -1
+            if action == 15:
+                eng.vera1(v1+a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 16:
+                eng.os1(z1+a)
+                eng.sdg1(sg1-a)
+                reward = -1
+            if action == 17:
+                eng.os1(z1+a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 18:
+                eng.gora1(g1-a)
+                eng.sdg1(sg1-a)
+                reward = -1
+            if action == 19:
+                eng.vera1(v1-a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 20:
+                eng.os1(z1-a)
+                eng.sdg1(sg1-a)
+                reward = -1
+            if action == 21:
+                eng.os1(z1-a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 22:
+                eng.gora1(g1-a)
+                eng.sdg1(sg1+a)
+                reward = -1
+            if action == 23:
+                eng.era1(v1-a)
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 24:
+                eng.os1(z1-a)
+                eng.sdg1(sg1+a)
+                reward = -1
+            if action == 25:
+                eng.os1(z1-a)
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 26:
+                eng.sdg1(sg1+a)
+                eng.sdv1(sv1+a)
+                reward = -1
+            if action == 27:
+                eng.sdg1(sg1-a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 28:
+                eng.sdg1(sg1+a)
+                eng.sdv1(sv1-a)
+                reward = -1
+            if action == 29:
+                eng.sdv1(sv1+a)
+                eng.sdg1(sg1-a)
+                reward = -1
+                    
+            #бесполезные действия, награда = -10
+            if action == 30:
+                eng.gora1(g1+a)
+                eng.sdv1(sv1+a)
+                reward = -10
+            if action == 31:
+                eng.vera1(v1+a)
+                eng.sdg1(sg1+a)
+                reward = -10
+            if action == 32:
+                eng.os1(z1+a)
+                eng.gora1(g1+a)
+                reward = -10
+            if action == 33:
+                eng.os1(z1+a)
+                eng.vera1(v1+a)
+                reward = -10
+            if action == 34:
+                eng.gora1(g1+a)
+                eng.sdv1(sv1-a)
+                reward = -10
+            if action == 35:
+                eng.vera1(v1+a)
+                eng.sdg1(sg1-a)
+                reward = -10
+            if action == 36:
+                eng.os1(z1+a)
+                eng.gora1(g1-a)
+                reward = -10
+            if action == 37:
+                eng.os1(z1+a)
+                eng.vera1(v1-a)
+                reward = -10
+            if action == 38:
+                eng.gora1(g1-a)
+                eng.sdv1(sv1+a)
+                reward = -10
+            if action == 39:
+                eng.vera1(v1-a)
+                eng.sdg1(sg1+a)
+                reward = -10
+            if action == 40:
+                eng.os1(z1-a)
+                eng.gora1(g1+a)
+                reward = -10
+            if action == 41:
+                eng.os1(z1-a)
+                eng.vera1(v1+a)
+                reward = -10
+            if action == 42:
+                eng.gora1(g1-a)
+                eng.sdv1(sv1-a)
+                reward = -10
+            if action == 43:
+                eng.vera1(v1-a)
+                eng.sdg1(sg1-a)
+                reward = -10
+            if action == 44:
+                eng.os1(z1-a)
+                eng.gora1(g1-a)
+                reward = -10
+            if action == 45:
+                eng.os1(z1-a)
+                eng.vera1(v1-a)
+                reward = -10
+                
+            new_state = eng.Obrabotka()                      #получение нового состояния после проделанного действия
+               
+            if new_state <= coef_hands                       #проверка, не является ли состояние наилучшим
+                reward = 100
+                    
+            P[state][action].append((1.0, new_state, reward, done))
+                
         initial_state_distrib /= initial_state_distrib.sum()
-        discrete.DiscreteEnv.__init__(
-            self, num_states, num_actions, P, initial_state_distrib)
+        discrete.DiscreteEnv.__init__(self, num_states, num_actions, P, initial_state_distrib)
 
     def encode(self, taxi_row, taxi_col, pass_loc, dest_idx):
         # (5) 5, 5, 4
