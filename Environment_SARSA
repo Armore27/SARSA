@@ -89,10 +89,11 @@ class MirrorENV(discrete.DiscreteEnv):
             state
             reward = -1                                #награда по умолчанию, когда не совершено ни одно действие
             done = False
-                       
+            a = 1        
             #возможные действия, награда = -1
             if action == 0:
-                eng.sdg1(sg1+a)
+                b = sg1+a
+                eng.sdg1(b)
                 reward = -1
             if action == 1:
                 eng.sdv1(sv1+a)
@@ -275,31 +276,8 @@ class MirrorENV(discrete.DiscreteEnv):
                     
             P[state][action].append((1.0, new_state, reward, done))
                 
-        initial_state_distrib /= initial_state_distrib.sum()
-        discrete.DiscreteEnv.__init__(self, num_states, num_actions, P, initial_state_distrib)
+        discrete.DiscreteEnv.__init__(self, num_states, num_actions, P)
 
-    def encode(self, taxi_row, taxi_col, pass_loc, dest_idx):
-        # (5) 5, 5, 4
-        i = taxi_row
-        i *= 5
-        i += taxi_col
-        i *= 5
-        i += pass_loc
-        i *= 4
-        i += dest_idx
-        return i
-
-    def decode(self, i):
-        out = []
-        out.append(i % 4)
-        i = i // 4
-        out.append(i % 5)
-        i = i // 5
-        out.append(i % 5)
-        i = i // 5
-        out.append(i)
-        assert 0 <= i < 5
-        return reversed(out)
 
     def render(self, mode='human'):
         outfile = StringIO() if mode == 'ansi' else sys.stdout
