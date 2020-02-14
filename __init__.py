@@ -1,6 +1,1 @@
-from gym.envs.registration import register
-
-register(
-    id='Mirror-v0',
-    entry_point='gym_mirror.envs:MirrorEnv'
-)
+from gym_mirror.envs.mirror_env import MirrorEnv
