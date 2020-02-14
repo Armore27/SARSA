@@ -1,0 +1,69 @@
+---
+title: "Mirror"
+author: Anastasiya
+date: 13.02.2020
+output: rmarkdown::html_vignette
+---
+    Description:
+    There is a mirror, which is moved by 5 motors. Each motor moves mirror into the specific direction. The main task is to find
+    most suitable mirror position according to the Zernike polinomials.
+    The end of the episode is when the mirror in the most suitable position.
+    Observations:
+    There are ??? discrete states since there are ??? mirror positions.
+
+    Actions:
+    There are 45 discrete deterministic actions: (Imported from MATLAB)
+    - 0: sdg1(sg1+a)
+    - 1: sdv1(sv1+a)
+    - 2: os1(z1+a)
+    - 3: gora1(g1+a)
+    - 4: vera1(v1+a)
+    - 5: sdg1(sg1-a)
+    - 6: sdv1(sv1-a)
+    - 7: os1(z1-a)
+    - 8: gora1(g1-a)
+    - 9: vera1(v1-a)
+    - 10: gora1(g1+a)sdg1(sg1+a)
+    - 11: vera1(v1+a)sdv1(sv1+a)
+    - 12: os1(z1+a)sdg1(sg1+a)
+    - 13: os1(z1+a)sdv1(sv1+a)
+    - 14: gora1(g1+a)sdg1(sg1-a)
+    - 15: vera1(v1+a)sdv1(sv1-a)
+    - 16: os1(z1+a)sdg1(sg1-a)
+    - 17: os1(z1+a)sdv1(sv1-a)
+    - 18: gora1(g1-a)sdg1(sg1-a)
+    - 19: vera1(v1-a)sdv1(sv1-a)
+    - 20: os1(z1-a)sdg1(sg1-a)
+    - 21: os1(z1-a)sdv1(sv1-a)
+    - 22: gora1(g1-a)sdg1(sg1+a)
+    - 23: vera1(v1-a)sdv1(sv1+a)
+    - 24: os1(z1-a)sdg1(sg1+a)
+    - 25: os1(z1-a)sdv1(sv1+a)
+    - 26: sdg1(sg1+a)sdv1(sv1+a)
+    - 27: sdg1(sg1-a)sdv1(sv1-a)
+    - 28: sdg1(sg1+a)sdv1(sv1-a)
+    - 29: sdv1(sv1+a)sdg1(sg1-a)
+    - 30: gora1(g1+a)sdv1(sv1+a)
+    - 31: vera1(v1+a)sdg1(sg1+a)
+    - 32: os1(z1+a)gora1(g1+a)
+    - 33: os1(z1+a)vera1(v1+a)
+    - 34: gora1(g1+a)sdv1(sv1-a)
+    - 35: vera1(v1+a)sdg1(sg1-a)
+    - 36: os1(z1+a)gora1(g1-a)
+    - 37: os1(z1+a)vera1(v1-a)
+    - 38: gora1(g1-a)sdv1(sv1+a)
+    - 39: vera1(v1-a)sdg1(sg1+a)
+    - 40: os1(z1-a)gora1(g1+a)
+    - 41: os1(z1-a)vera1(v1+a)
+    - 42: gora1(g1-a)sdv1(sv1-a)
+    - 43: vera1(v1-a)sdg1(sg1-a)
+    - 44: os1(z1-a)gora1(g1-a)
+    - 45: os1(z1-a)vera1(v1-a)
+
+    Rewards:
+    Reward of -1 for each possible action and an additional reward for completed system +100.
+    Reward of -10 for each unnecessary action.
+
+    State space is represented by:
+    14 Zernike polinomials (an array) (Imported from MATLAB)
+
