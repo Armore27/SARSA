@@ -1,20 +1,12 @@
 import gym
 import matlab.engine
-#import numpy as np
-import pandas as pd
-
-class Mirror():
-    def __init__(self, sg1 = 0, sv1 = 0, z1 = 0, g1 = 0, v1 = 0):
-        self.sg1 = sg1
-        self.sv1 = sv1
-        self.z1 = z1
-        self.g1 = g1
-        self.v1 = v1
+import numpy as np
+import scipy.io
 
 class MirrorEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, num_states = 500, num_actions = 45, state = 0,  sg1 = 0, sv1 = 0, z1 = 0, g1 = 0, v1 = 0):
+    def __init__(self, state, num_states = 0, num_actions = 45, sg1 = 0, sv1 = 0, z1 = 0, g1 = 0, v1 = 0):
         self.num_states = num_states
         self.num_actions = num_actions
         self.state = state
@@ -216,17 +208,21 @@ class MirrorEnv(gym.Env):
 
         state = self._get_state()
         reward = self._get_reward()
-        return state, reward
+        return self.state, reward, self.z1, self.sg1, self.sv1, self.g1, self.v1
 
     def _get_state(self):
         """
         This function returns the current state.
         """
+        self.num_states = +1
         eng = matlab.engine.start_matlab()
-        state = eng.Obrabotka()
-        return state
+        self.state = eng.Obrabotka()
+        return self.state, self.num_states
 
     def reset(self, a_z1 = 0, a_sg1 = 0, a_sv1 = 0, b_g1 = 0, b_v1 = 0):
+        """
+        This function resets the environment into the initial state.
+        """
         eng = matlab.engine.start_matlab()
 
         self.a_z1 = a_z1
@@ -249,22 +245,25 @@ class MirrorEnv(gym.Env):
 
         return self._get_state()
 
+    def end(self):
+        if self.num_states == 500:
+            return self.reset 
 
     def _get_reward(self):
         """
         This function calculates the reward.
         """
-        koef_hands = pd.read_csv('koef.csv')
+        zernike = scipy.io.loadmat('koef.mat')
+        koef_hands = np.array(zernike)
 
         rewards = {"useful": -1,
                    "unuseful": -10,
                    "complited": 200}
-
-        for self.action in range(0, 30):
-            return rewards["useful"]
-        for self.actions in range(30, 46):
-            return rewards["unuseful"]
         for i in self.state:
             for j in koef_hands:
                 if self.state[i] <= koef_hands[j]:
                     return rewards["complited"]
+        for self.action in range(0, 30):
+            return rewards["useful"]
+        for self.actions in range(30, 46):
+            return rewards["unuseful"]
