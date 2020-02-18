@@ -1,24 +1,22 @@
 import gym
+import gym_mirror
 import numpy as np
 import pandas as pd
-#import matplotlib.pyplot as plt
-
-
-from IPython.display import clear_output
-from time import sleep
+import matplotlib.pyplot as plt
 
 class Agent:
-    def __init__(self, method, start_alpha = 0.3, start_gamma = 0.9, start_epsilon = 0.5):
+    def __init__(self, method, state_space = 500, action_space = 27,  start_alpha = 0.3, start_gamma = 0.9, start_epsilon = 0.5):
         """method: one of 'q_learning', 'sarsa' or 'expected_sarsa' """
-        self.state_space = self.env.observation_space.n
-        self.n_actions = self.env.action_space.n
+        self.state_space = state_space
+        self.n_actions = action_space
         self.method = method
         self.env = gym.make('Mirror-v0')
         self.epsilon = start_epsilon
         self.gamma = start_gamma
         self.alpha = start_alpha
+        print(self.state_space, self.n_actions)
         # Set up initial q-table
-        self.q = np.zeros(shape = (self.env.observation_space.n, self.env.action_space.n))
+        self.q = np.zeros(shape = (self.state_space, self.n_actions))
         # Set up policy pi, init as equiprobable random policy
         self.pi = np.zeros_like(self.q)
         for i in range(self.pi.shape[0]):
@@ -66,13 +64,6 @@ class Agent:
             r_sum += r
         return r_sum
 
-        best_a = np.random.choice(np.where(self.q[s] == max(self.q[s]))[0])
-        for i in range(self.n_actions):
-            if i == best_a:
-                self.pi[s, i] = 1 - (self.n_actions - 1) * (self.epsilon / self.n_actions)
-            else:
-                self.pi[s, i] = self.epsilon / self.n_actions
-
 def train_agent(agent, n_episodes=11, epsilon_decay=0.99995, alpha_decay=0.99995, print_trace=False):
     r_sums = []
     for ep in range(n_episodes):
@@ -86,62 +77,23 @@ def train_agent(agent, n_episodes=11, epsilon_decay=0.99995, alpha_decay=0.99995
                 print("Last 100 episodes avg reward: ", np.mean(r_sums[ep - 100:ep]))
         r_sums.append(r_sum)
     return r_sums
+if __name__ == "__main__":
+    # Create agents
+    sarsa_agent = Agent(method='sarsa')
+    e_sarsa_agent = Agent(method='expected_sarsa')
+    q_learning_agent = Agent(method='q_learning')
 
-# Create agents
-sarsa_agent = Agent(method='sarsa')
-e_sarsa_agent = Agent(method='expected_sarsa')
-q_learning_agent = Agent(method='q_learning')
+    # Train agents
+    r_sums_sarsa = train_agent(sarsa_agent, print_trace=True)
+    r_sums_e_sarsa = train_agent(e_sarsa_agent, print_trace=True)
+    r_sums_q_learning = train_agent(q_learning_agent, print_trace=True)
 
-# Train agents
-r_sums_sarsa = train_agent(sarsa_agent, print_trace=True)
-r_sums_e_sarsa = train_agent(e_sarsa_agent, print_trace=True)
-r_sums_q_learning = train_agent(q_learning_agent, print_trace=True)
-
-df = pd.DataFrame({"Sarsa": r_sums_sarsa,
+    df = pd.DataFrame({"Sarsa": r_sums_sarsa,
                        "Expected_Sarsa": r_sums_e_sarsa,
                        "Q-Learning": r_sums_q_learning})
-df_ma = df.rolling(100, min_periods=100).mean()
-df_ma.iloc[1:1000].plot()
+    df_ma = df.rolling(100, min_periods=100).mean()
+    y = df_ma.iloc[1:1000].values
+    x = range(1, 1000)
+    plt.plot(x, y)
+    plt.show()
 
-def generate_frames(agent, start_state):
-    agent.env.reset()
-    agent.env.env.s = start_state
-    s = start_state
-    policy = np.argmax(agent.pi, axis=1)
-    epochs = 0
-    penalties, reward = 0, 0
-    frames = []
-    done = False
-    frames.append({
-            'frame': agent.env.render(mode='ansi'),
-            'state': agent.env.env.s,
-            'action': "Start",
-            'reward': 0})
-    while not done:
-        a = policy[s]
-        s, reward, done, info = agent.env.step(a)
-        if reward == -10:
-            penalties += 1
-
-            # Put each rendered frame into dict for animation
-        frames.append({
-                'frame': agent.env.render(mode='ansi'),
-                'state': s,
-                'action': a,
-                'reward': reward
-            }
-            )
-        epochs += 1
-    print("Timesteps taken: {}".format(epochs))
-    print("Penalties incurred: {}".format(penalties))
-    return frames
-
-def print_frames(frames):
-    for i, frame in enumerate(frames):
-        clear_output(wait=True)
-        print(frame['frame'].getvalue())
-        print(f"Timestep: {i + 1}")
-        print(f"State: {frame['state']}")
-        print(f"Action: {frame['action']}")
-        print(f"Reward: {frame['reward']}")
-        sleep(.4)
