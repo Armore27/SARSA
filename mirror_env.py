@@ -206,7 +206,7 @@ class MirrorEnv(gym.Env):
 
         self.state = self._get_state()
         reward = self._get_reward()
-        return self.state, self.end, reward, self.z1, self.sg1, self.sv1, self.g1, self.v1
+        return self.state, self.end, reward, action, self.z1, self.sg1, self.sv1, self.g1, self.v1
 
     def _get_state(self):
         """
