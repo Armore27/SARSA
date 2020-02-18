@@ -235,8 +235,7 @@ class MirrorEnv(gym.Env):
         self.g1 = eng.vera1(self.b_v1)
 
     def end(self):
-        if self.num_states == 500:
-           self.reset 
+        if self.num_states == 500: 
            self.done = True
         
 
