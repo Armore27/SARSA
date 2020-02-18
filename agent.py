@@ -1,9 +1,19 @@
 import gym
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-%matplotlib inline
+import gym_bubbleshooter
 
-# For animation
-from IPython.display import clear_output
-from time import sleep
+
+def random_agent(episodes=100):
+	env = gym.make("BubbleShooter-v0")
+	env.reset()
+	env.render()
+	for e in range(episodes):
+		action = env.action_space.sample()
+		state, reward, done, _ = env.step(action)
+		env.render()
+		print(reward)
+		if done:
+			break
+
+
+if __name__ == "__main__":
+    random_agent()
