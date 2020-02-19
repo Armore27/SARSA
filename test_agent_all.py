@@ -25,11 +25,11 @@ class Agent:
 
     def simulate_episode(self):
         s = self.env.reset()
-        self.env.done = False
+        done = False
         r_sum = 0
         n_steps = 0
         gam = self.gamma
-        while not self.env.done:
+        while not done:
             n_steps += 1
             # take action from policy
             x = np.random.random()
